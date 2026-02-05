@@ -1,0 +1,34 @@
+name: Build Project Guide PDF
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'docs/Full_Project_Guide.md'
+
+jobs:
+  build_pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build PDF with pandoc/latex Docker image
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/data" pandoc/latex:2.19 \
+            pandoc /data/docs/Full_Project_Guide.md -o /data/docs/Full_Project_Guide.pdf
+
+      - name: Commit and push PDF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH=${GITHUB_REF#refs/heads/}
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/Full_Project_Guide.pdf || true
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: add generated Full_Project_Guide.pdf"
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:$BRANCH
+          else
+            echo "No changes to commit"
+          fi
