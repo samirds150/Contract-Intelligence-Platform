@@ -6,7 +6,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
-    'django.contrib.staticfiles',
     'ragapp',
 ]
 
@@ -30,7 +29,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ragsite.wsgi.application'
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_ROOT = BASE_DIR / 'data' / 'raw'
 MEDIA_URL = '/media/'
+
+# Database (empty for development without migrations)
+DATABASES = {}
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
