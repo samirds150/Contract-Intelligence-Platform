@@ -15,6 +15,76 @@ questionInput.addEventListener('keypress', (e) => {
     }
 });
 
+// Upload UI elements
+const fileInput = document.getElementById('file-input');
+const uploadBtn = document.getElementById('upload-btn');
+const fileList = document.getElementById('file-list');
+
+if (uploadBtn) uploadBtn.addEventListener('click', handleUpload);
+
+// Load current file list on page load
+async function refreshFileList() {
+    try {
+        const res = await fetch('/api/files');
+        const data = await res.json();
+        if (data.success) {
+            fileList.innerHTML = '';
+            if (data.files.length === 0) {
+                fileList.innerHTML = '<p class="muted">No contract files uploaded yet.</p>';
+            } else {
+                const ul = document.createElement('ul');
+                data.files.forEach(f => {
+                    const li = document.createElement('li');
+                    li.textContent = f;
+                    ul.appendChild(li);
+                });
+                fileList.appendChild(ul);
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to load file list', e);
+    }
+}
+
+async function handleUpload() {
+    const files = fileInput.files;
+    if (!files || files.length === 0) {
+        showError('Please select at least one .txt file to upload.');
+        return;
+    }
+
+    const form = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        form.append('files', files[i]);
+    }
+
+    loading.style.display = 'flex';
+    uploadBtn.disabled = true;
+    clearError();
+
+    try {
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: form
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            // Refresh file list and show success
+            await refreshFileList();
+            resetForm();
+            alert('Uploaded and rebuilt knowledge base successfully.');
+        } else {
+            throw new Error(data.error || 'Upload failed');
+        }
+    } catch (err) {
+        console.error(err);
+        showError(err.message || 'Upload error');
+    } finally {
+        loading.style.display = 'none';
+        uploadBtn.disabled = false;
+    }
+}
+
 /**
  * Handle question submission
  */

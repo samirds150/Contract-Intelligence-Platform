@@ -4,6 +4,7 @@ Provides a user-friendly interface for asking questions about contracts.
 """
 
 from flask import Flask, render_template, request, jsonify
+from werkzeug.utils import secure_filename
 import yaml
 from pathlib import Path
 from src.rag_system import ContractRAG
@@ -16,6 +17,8 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max request size
+app.config['UPLOAD_FOLDER'] = Path('data/raw')
+app.config['ALLOWED_EXTENSIONS'] = {'.txt'}
 
 # Global RAG instance
 rag = None
@@ -49,6 +52,56 @@ def initialize_rag():
 def index():
     """Render the main page."""
     return render_template('index.html')
+
+
+def allowed_file(filename: str) -> bool:
+    return Path(filename).suffix.lower() in app.config['ALLOWED_EXTENSIONS']
+
+
+@app.route('/api/files', methods=['GET'])
+def list_files():
+    """Return list of uploaded contract files."""
+    folder = app.config['UPLOAD_FOLDER']
+    folder.mkdir(parents=True, exist_ok=True)
+    files = [f.name for f in folder.glob('*.txt')]
+    return jsonify({'success': True, 'files': files})
+
+
+@app.route('/api/upload', methods=['POST'])
+def upload_files():
+    """Handle uploading of .txt contract files and optionally rebuild index."""
+    if 'files' not in request.files:
+        return jsonify({'success': False, 'error': 'No files part in request'}), 400
+
+    files = request.files.getlist('files')
+    if not files:
+        return jsonify({'success': False, 'error': 'No files uploaded'}), 400
+
+    saved = []
+    upload_folder = app.config['UPLOAD_FOLDER']
+    upload_folder.mkdir(parents=True, exist_ok=True)
+
+    for file in files:
+        filename = secure_filename(file.filename)
+        if filename == '':
+            continue
+        if not allowed_file(filename):
+            continue
+        dest = upload_folder / filename
+        file.save(dest)
+        saved.append(dest.name)
+
+    # If rag not initialized, try initializing
+    global rag
+    if rag is None:
+        initialize_rag()
+
+    # Rebuild knowledge base to include new files
+    try:
+        rag.build_knowledge_base(str(upload_folder))
+        return jsonify({'success': True, 'saved': saved})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e), 'saved': saved}), 500
 
 
 @app.route('/api/ask', methods=['POST'])

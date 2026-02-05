@@ -20,6 +20,17 @@
         <main class="main-content">
             <!-- Query Section -->
             <section class="query-section">
+                <!-- Upload Section -->
+                <div class="upload-section">
+                    <h3>Upload Contract Files</h3>
+                    <p class="muted">Add more .txt contract files to update the knowledge base.</p>
+                    <div class="upload-controls">
+                        <input id="file-input" type="file" accept=".txt" multiple />
+                        <button id="upload-btn" class="submit-btn">Upload & Rebuild</button>
+                    </div>
+                    <div id="file-list" class="file-list"></div>
+                </div>
+
                 <div class="input-group">
                     <textarea 
                         id="question-input"
