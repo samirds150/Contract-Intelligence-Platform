@@ -1,0 +1,45 @@
+name: Python Integration Tests
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 3 * * 0'
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-cache-${{ runner.os }}-v1
+          restore-keys: |
+            pip-cache-${{ runner.os }}-v1
+
+      - name: Cache Hugging Face Hub
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/huggingface
+            ~/.cache/huggingface_hub
+          key: hf-cache-${{ runner.os }}-v1
+          restore-keys: |
+            hf-cache-${{ runner.os }}-v1
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run integration test
+        run: |
+          pytest -q tests/test_integration.py -q

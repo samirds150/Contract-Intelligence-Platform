@@ -1,0 +1,6 @@
+data_path: data/raw
+models_path: models
+embedding_model: sentence-transformers/all-MiniLM-L6-v2
+qa_model: deepset/minilm-uncased-squad2
+chunk_size: 400
+chunk_overlap: 50
