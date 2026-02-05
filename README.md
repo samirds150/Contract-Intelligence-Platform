@@ -1,5 +1,7 @@
 # Contract RAG Application
 
+[![CI](https://github.com/samirds150/Contract-Intelligence-Platform/actions/workflows/python-ci.yml/badge.svg)](https://github.com/samirds150/Contract-Intelligence-Platform/actions/workflows/python-ci.yml)
+
 A CPU-friendly Retrieval Augmented Generation (RAG) system for answering questions about procurement contracts using BERT embeddings and lightweight transformers.
 
 ## 📋 Overview
