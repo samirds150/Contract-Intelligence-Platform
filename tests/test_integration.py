@@ -21,26 +21,31 @@ def test_full_rag_pipeline(tmp_path):
         """
     )
 
-    # config: point to the temporary data dir and models output inside tmp_path
+    # config: nested structure expected by ContractRAG
+    models_dir = tmp_path / "models"
+    models_dir.mkdir()
     cfg = {
-        "data_path": str(data_dir),
-        "models_path": str(tmp_path / "models"),
-        "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
-        "qa_model": "deepset/minilm-uncased-squad2",
-        "chunk_size": 400,
-        "chunk_overlap": 50,
+        "data": {"chunk_size": 400, "chunk_overlap": 50},
+        "embedding": {
+            "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+            "faiss_index_path": str(models_dir / "faiss_index.bin"),
+            "metadata_path": str(models_dir / "metadata.pkl"),
+        },
+        "rag": {"top_k": 3, "similarity_threshold": 0.0},
+        "model": {"device": "cpu"},
     }
 
     # build KB (this will download models on first run)
     rag = ContractRAG(cfg)
-    rag.build_knowledge_base()
+    rag.build_knowledge_base(str(data_dir))
 
     # give a short sleep to ensure files are flushed on CI
     time.sleep(1)
 
     # run a simple query
-    answer = rag.answer_question("What is the contract term?")
-    assert answer is not None and isinstance(answer, str)
+    result = rag.answer_question("What is the contract term?")
+    assert isinstance(result, dict)
+    assert 'answer' in result and isinstance(result['answer'], str)
 
     # clean up to avoid leaving large files in runner workspace
-    shutil.rmtree(cfg["models_path"], ignore_errors=True)
+    shutil.rmtree(str(models_dir), ignore_errors=True)
