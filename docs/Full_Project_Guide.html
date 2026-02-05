@@ -468,30 +468,6 @@ pip install -r requirements.txt</code></pre>
 <pre><code class="language-bash">python manage.py migrate
 python manage.py runserver</code></pre>
 
-<h2>Generate PDF from this document</h2>
-
-<p>Recommended: install <code>pandoc</code> and run:</p>
-
-<pre><code class="language-bash">pandoc docs/Full_Project_Guide.md -o docs/Full_Project_Guide.pdf --from markdown</code></pre>
-
-<p>Or use VS Code's Markdown preview and export as PDF.</p>
-
-<hr>
-
-<p>Notes and further reading: keep models small for CPU; consider async rebuilds for long-running indexing; persist RAG instance in memory when running under a production WSGI server to avoid reloading heavy models per request.</p>
-
-<hr>
-
-<p>If you want, I can now:</p>
-<ul>
-<li>generate the PDF here (if you prefer, I can add a script that attempts conversion locally), or</li>
-<li>split this single large file into per-file templates or a downloadable ZIP, or</li>
-<li>produce a step-by-step script that creates the full project skeleton automatically.</li>
-</ul>
-
-<p>Tell me which of the above you'd like next.</p>
-
-<p>&lt;!-- Trigger note: minor whitespace update to trigger CI workflow --&gt;</p>
 
     </div>
 </body>

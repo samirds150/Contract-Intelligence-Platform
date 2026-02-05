@@ -287,27 +287,3 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-## Generate PDF from this document
-
-Recommended: install `pandoc` and run:
-
-```bash
-pandoc docs/Full_Project_Guide.md -o docs/Full_Project_Guide.pdf --from markdown
-```
-
-Or use VS Code's Markdown preview and export as PDF.
-
---
-
-Notes and further reading: keep models small for CPU; consider async rebuilds for long-running indexing; persist RAG instance in memory when running under a production WSGI server to avoid reloading heavy models per request.
-
---
-
-If you want, I can now:
-- generate the PDF here (if you prefer, I can add a script that attempts conversion locally), or
-- split this single large file into per-file templates or a downloadable ZIP, or
-- produce a step-by-step script that creates the full project skeleton automatically.
-
-Tell me which of the above you'd like next.
-
-<!-- Trigger note: minor whitespace update to trigger CI workflow -->
