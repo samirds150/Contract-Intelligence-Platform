@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,12 +10,18 @@
 <body>
   <div class="container">
     <h1>Upload Result</h1>
-    <p>Saved files:</p>
-    <ul>
-      {% for s in saved %}
-        <li>{{ s }}</li>
-      {% endfor %}
-    </ul>
+    {% if error %}
+      <p style="color: red;">Error: {{ error }}</p>
+    {% endif %}
+    {% if saved %}
+      <p>Saved files:</p>
+      <ul>
+        {% for s in saved %}
+          <li>{{ s }}</li>
+        {% endfor %}
+      </ul>
+      <p>Knowledge base rebuilt successfully!</p>
+    {% endif %}
     <p><a href="{% url 'ragapp:index' %}">Back</a></p>
   </div>
 </body>

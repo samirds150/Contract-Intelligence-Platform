@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract RAG - Full Project Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.7;
+            color: #333;
+            background: #fafbfc;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 50px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+            .container {
+                max-width: 100%;
+                padding: 30px;
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+        
+        h1 {
+            font-size: 2.8em;
+            font-weight: 700;
+            margin: 0.3em 0 0.4em 0;
+            color: #1a1a1a;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 0.3em;
+            letter-spacing: -0.5px;
+        }
+        
+        h2 {
+            font-size: 2em;
+            font-weight: 600;
+            margin: 1.3em 0 0.5em 0;
+            color: #0066cc;
+            padding-top: 0.5em;
+        }
+        
+        h3 {
+            font-size: 1.45em;
+            font-weight: 600;
+            margin: 1em 0 0.4em 0;
+            color: #0088dd;
+        }
+        
+        p {
+            margin: 0.9em 0;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        
+        code {
+            background-color: #f0f0f0;
+            color: #d73a49;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            border: 1px solid #e1e4e8;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 18px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1.2em 0;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.5;
+            border-left: 5px solid #0066cc;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+            border: none;
+            font-size: inherit;
+            display: block;
+            white-space: pre;
+        }
+        
+        ul {
+            margin: 1em 0;
+            padding-left: 0;
+        }
+        
+        li {
+            margin: 0.6em 0 0.6em 2.5em;
+            line-height: 1.7;
+            text-align: left;
+        }
+        
+        a {
+            color: #0066cc;
+            text-decoration: none;
+            border-bottom: 1px dotted #0066cc;
+            transition: color 0.2s;
+        }
+        
+        a:hover {
+            color: #0052a3;
+            text-decoration: underline;
+        }
+        
+        hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #0066cc, transparent);
+            margin: 2.5em 0;
+        }
+        
+        strong {
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        
+        em {
+            font-style: italic;
+            color: #555;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2em;
+                margin: 0.2em 0 0.3em 0;
+            }
+            
+            h2 {
+                font-size: 1.5em;
+                margin: 1em 0 0.4em 0;
+            }
+            
+            h3 {
+                font-size: 1.2em;
+                margin: 0.8em 0 0.3em 0;
+            }
+            
+            pre {
+                font-size: 0.75em;
+                padding: 12px;
+                margin: 1em 0;
+            }
+            
+            li {
+                margin-left: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Contract RAG — Full Project Guide</h1>
+
+<p>This document provides a High-Level Design (HLD), Low-Level Design (LLD), and the full source code for the Contract RAG project, with step-by-step explanations so you can recreate the project locally. At the end there are instructions to convert this file to PDF.</p>
+
+<hr>
+
+<p><strong>Contents</strong></p>
+<ul>
+<li>Overview (HLD)</li>
+<li>Architecture diagram (text)</li>
+<li>Components and responsibilities (LLD)</li>
+<li>File-by-file code (ordered sequence to build the project)</li>
+<li>How to run locally</li>
+<li>Generate PDF from this file</li>
+</ul>
+
+<hr>
+
+<h2>High-Level Design (HLD)</h2>
+
+<p>Goal: build a CPU-friendly Retrieval-Augmented-Generation (RAG) system to answer questions about procurement/contract documents.</p>
+
+<ul>
+<li>Ingest contract text files (.txt)</li>
+<li>Chunk and embed documents using a small Sentence-Transformers model</li>
+<li>Store embeddings in a FAISS (faiss-cpu) index</li>
+<li>Retrieve top-k chunks for a query and run an extractive QA model over the retrieved context</li>
+<li>Provide a web UI (Django) to upload files, rebuild index, and ask questions</li>
+</ul>
+
+<p>Key design constraints:</p>
+<ul>
+<li>CPU-only (no GPU required)</li>
+<li>Use local models from Hugging Face (MiniLM for embeddings, small QA model)</li>
+<li>Keep the system simple and reproducible</li>
+</ul>
+
+<h2>Architecture (text diagram)</h2>
+
+<p>Frontend (Django) &lt;---&gt; Backend (ContractRAG in <code>src/</code>) --&gt; FAISS index + metadata</p>
+<p>\--&gt; SentenceTransformers (embeddings)</p>
+<p>\--&gt; Transformers QA pipeline</p>
+
+<h2>Low-Level Design (LLD): Components</h2>
+
+<ul>
+<li><code>src/data_processor.py</code>: load <code>.txt</code> files, clean text, chunk into fixed-size overlapping chunks</li>
+<li><code>src/embeddings.py</code>: wrap SentenceTransformers; encode chunks, build &amp; search FAISS index, save/load index and metadata</li>
+<li><code>src/rag_system.py</code>: orchestrates processing, indexing, retrieval, and QA (using transformers pipeline for question-answering)</li>
+<li><code>setup_knowledge_base.py</code>: CLI to build KB from <code>data/raw/</code></li>
+<li><code>query.py</code>: interactive CLI to query the built KB</li>
+<li>Django app <code>ragapp</code>: routes, forms, templates that call into <code>src/ContractRAG</code></li>
+<li><code>config/config.yaml</code>: small config file for model names and paths</li>
+</ul>
+
+<h2>Step-by-step files and code (create in this order)</h2>
+
+<p>1) <code>config/config.yaml</code></p>
+
+<pre><code class="language-yaml">data_path: data/raw
+models_path: models
+embedding_model: sentence-transformers/all-MiniLM-L6-v2
+qa_model: deepset/minilm-uncased-squad2
+chunk_size: 400
+chunk_overlap: 50</code></pre>
+
+<p>2) <code>src/data_processor.py</code></p>
+
+<pre><code class="language-python">from pathlib import Path
+from typing import List, Dict
+
+class DataProcessor:
+    &quot;&quot;&quot;Load .txt files and produce overlapping text chunks.
+
+    Methods:
+    - load_documents(data_path): returns list of dicts {source, text}
+    - clean_text(text): minimal normalization
+    - chunk_documents(docs): yield chunks with source metadata
+    &quot;&quot;&quot;
+
+    def __init__(self, chunk_size: int = 400, chunk_overlap: int = 50):
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+
+    def load_documents(self, data_path: str) -&gt; List[Dict]:
+        p = Path(data_path)
+        docs = []
+        for f in p.glob('*.txt'):
+            text = f.read_text(encoding='utf-8')
+            docs.append({'source': f.name, 'text': text})
+        return docs
+
+    def clean_text(self, text: str) -&gt; str:
+        # Minimal cleaning: normalize whitespace
+        return ' '.join(text.split())
+
+    def chunk_documents(self, docs: List[Dict]) -&gt; List[Dict]:
+        chunks = []
+        for d in docs:
+            text = self.clean_text(d['text'])
+            start = 0
+            while start &lt; len(text):
+                end = min(start + self.chunk_size, len(text))
+                chunk_text = text[start:end]
+                chunks.append({'source': d['source'], 'text': chunk_text})
+                start += self.chunk_size - self.chunk_overlap
+        return chunks
+
+    def process_pipeline(self, data_path: str) -&gt; List[Dict]:
+        docs = self.load_documents(data_path)
+        return self.chunk_documents(docs)</code></pre>
+
+<p>Explanation: this module reads <code>.txt</code> files and creates overlapping chunks which are used for indexing and retrieval.</p>
+
+<p>3) <code>src/embeddings.py</code></p>
+
+<pre><code class="language-python">from sentence_transformers import SentenceTransformer
+import numpy as np
+import faiss
+import pickle
+from typing import List, Dict
+
+class EmbeddingManager:
+    def __init__(self, model_name: str, device: str = 'cpu'):
+        self.model = SentenceTransformer(model_name)
+        self.dim = self.model.get_sentence_embedding_dimension()
+        self.index = None
+
+    def encode_documents(self, chunks: List[Dict]) -&gt; np.ndarray:
+        texts = [c['text'] for c in chunks]
+        embeddings = self.model.encode(texts, show_progress_bar=False)
+        return np.array(embeddings, dtype='float32')
+
+    def build_index(self, embeddings: np.ndarray, chunks: List[Dict]):
+        self.index = faiss.IndexFlatIP(self.dim)
+        faiss.normalize_L2(embeddings)
+        self.index.add(embeddings)
+
+    def search(self, query: str, top_k: int = 3):
+        q_emb = self.model.encode([query])
+        q_emb = np.array(q_emb, dtype='float32')
+        faiss.normalize_L2(q_emb)
+        D, I = self.index.search(q_emb, top_k)
+        return D[0], I[0]
+
+    def save_index(self, faiss_path: str, metadata_path: str, chunks: List[Dict]):
+        faiss.write_index(self.index, faiss_path)
+        with open(metadata_path, 'wb') as f:
+            pickle.dump(chunks, f)
+
+    def load_index(self, faiss_path: str, metadata_path: str):
+        self.index = faiss.read_index(faiss_path)
+        with open(metadata_path, 'rb') as f:
+            chunks = pickle.load(f)
+        return chunks</code></pre>
+
+<p>Explanation: handles embedding generation, FAISS index creation/search, and persistence.</p>
+
+<p>4) <code>src/rag_system.py</code></p>
+
+<pre><code class="language-python">from typing import List, Dict
+from src.data_processor import DataProcessor
+from src.embeddings import EmbeddingManager
+from transformers import pipeline
+
+class ContractRAG:
+    def __init__(self, config: Dict):
+        self.config = config
+        self.device = config.get('model', {}).get('device', 'cpu')
+        self.data_processor = DataProcessor(
+            chunk_size=config['data']['chunk_size'],
+            chunk_overlap=config['data']['chunk_overlap']
+        )
+        self.embedding_manager = EmbeddingManager(
+            model_name=config['embedding']['model_name'],
+            device=self.device
+        )
+        self.qa_pipeline = pipeline('question-answering', model=config.get('qa_model', 'deepset/minilm-uncased-squad2'), device=-1)
+
+    def build_knowledge_base(self, data_path: str):
+        chunks = self.data_processor.process_pipeline(data_path)
+        embeddings = self.embedding_manager.encode_documents(chunks)
+        self.embedding_manager.build_index(embeddings, chunks)
+        self.embedding_manager.save_index(self.config['embedding']['faiss_index_path'], self.config['embedding']['metadata_path'], chunks)
+
+    def load_knowledge_base(self):
+        self.chunks = self.embedding_manager.load_index(self.config['embedding']['faiss_index_path'], self.config['embedding']['metadata_path'])
+
+    def retrieve_context(self, question: str, top_k: int = 3):
+        D, I = self.embedding_manager.search(question, top_k=top_k)
+        results = []
+        for score, idx in zip(D, I):
+            results.append({'text': self.chunks[idx]['text'], 'source': self.chunks[idx]['source'], 'similarity': float(score)})
+        return results
+
+    def answer_question(self, question: str, top_k: int = 3):
+        context = ' '.join([c['text'] for c in self.retrieve_context(question, top_k)])
+        if not context:
+            return {'answer': 'No relevant info found', 'confidence': 0.0, 'context': [], 'sources': []}
+        res = self.qa_pipeline(question=question, context=context)
+        return {'answer': res.get('answer'), 'confidence': res.get('score', 0.0), 'context': [], 'sources': []}</code></pre>
+
+<p>Explanation: ties together preprocessing, embeddings and QA. <code>build_knowledge_base</code> creates the FAISS index files.</p>
+
+<p>5) <code>setup_knowledge_base.py</code> (root)</p>
+
+<pre><code class="language-python">import yaml
+from src.rag_system import ContractRAG
+
+with open('config/config.yaml') as f:
+    c = yaml.safe_load(f)
+
+cfg = {
+    'data': {'chunk_size': c.get('chunk_size', 400), 'chunk_overlap': c.get('chunk_overlap', 50)},
+    'embedding': {'model_name': c.get('embedding_model'), 'faiss_index_path': f&quot;{c.get('models_path')}/faiss_index.bin&quot;, 'metadata_path': f&quot;{c.get('models_path')}/metadata.pkl&quot;},
+    'model': {'device': 'cpu'},
+}
+
+rag = ContractRAG(cfg)
+rag.build_knowledge_base(c.get('data_path', 'data/raw'))</code></pre>
+
+<p>6) <code>query.py</code> (CLI interactive)</p>
+
+<pre><code class="language-python">import yaml
+from src.rag_system import ContractRAG
+
+with open('config/config.yaml') as f:
+    c = yaml.safe_load(f)
+
+cfg = {
+    'data': {'chunk_size': c.get('chunk_size', 400), 'chunk_overlap': c.get('chunk_overlap', 50)},
+    'embedding': {'model_name': c.get('embedding_model'), 'faiss_index_path': f&quot;{c.get('models_path')}/faiss_index.bin&quot;, 'metadata_path': f&quot;{c.get('models_path')}/metadata.pkl&quot;},
+    'model': {'device': 'cpu'},
+}
+
+rag = ContractRAG(cfg)
+rag.load_knowledge_base()
+
+while True:
+    q = input('Question (or &quot;exit&quot;): ').strip()
+    if q.lower() in ('exit', 'quit'):
+        break
+    print(rag.answer_question(q))</code></pre>
+
+<p>7) Django pieces (short summary)</p>
+
+<ul>
+<li><code>ragsite/settings.py</code> — standard Django settings; set <code>MEDIA_ROOT</code> to <code>data/raw</code> so uploads land in the same folder used for indexing.</li>
+<li><code>ragapp/forms.py</code> — <code>UploadForm</code> (<code>forms.FileField</code>) and <code>AskForm</code>.</li>
+<li><code>ragapp/views.py</code> — views that accept uploads, save files to <code>MEDIA_ROOT</code>, call <code>ContractRAG.build_knowledge_base()</code> and <code>ContractRAG.answer_question()</code>.</li>
+<li><code>templates/</code> — <code>django_index.html</code>, <code>upload_result.html</code>, <code>answer.html</code> (server-rendered forms).</li>
+</ul>
+
+<p>8) Tests and CI</p>
+
+<ul>
+<li>Keep tests small and unit-focused in CI. Heavy integration tests that download models can be scheduled separately.</li>
+</ul>
+
+<h2>How to recreate the project from scratch (commands)</h2>
+
+<p>1. Create virtualenv and activate</p>
+
+<pre><code class="language-bash">python -m venv .venv
+source .venv/bin/activate   # or .venv\\Scripts\\activate on Windows
+pip install -r requirements.txt</code></pre>
+
+<p>2. Prepare folders and add contracts</p>
+
+<pre><code class="language-bash">mkdir -p data/raw
+# put your .txt files in data/raw/</code></pre>
+
+<p>3. Build knowledge base</p>
+
+<pre><code class="language-bash">python setup_knowledge_base.py</code></pre>
+
+<p>4. Run Django server</p>
+
+<pre><code class="language-bash">python manage.py migrate
+python manage.py runserver</code></pre>
+
+<h2>Generate PDF from this document</h2>
+
+<p>Recommended: install <code>pandoc</code> and run:</p>
+
+<pre><code class="language-bash">pandoc docs/Full_Project_Guide.md -o docs/Full_Project_Guide.pdf --from markdown</code></pre>
+
+<p>Or use VS Code's Markdown preview and export as PDF.</p>
+
+<hr>
+
+<p>Notes and further reading: keep models small for CPU; consider async rebuilds for long-running indexing; persist RAG instance in memory when running under a production WSGI server to avoid reloading heavy models per request.</p>
+
+<hr>
+
+<p>If you want, I can now:</p>
+<ul>
+<li>generate the PDF here (if you prefer, I can add a script that attempts conversion locally), or</li>
+<li>split this single large file into per-file templates or a downloadable ZIP, or</li>
+<li>produce a step-by-step script that creates the full project skeleton automatically.</li>
+</ul>
+
+<p>Tell me which of the above you'd like next.</p>
+
+<p>&lt;!-- Trigger note: minor whitespace update to trigger CI workflow --&gt;</p>
+
+    </div>
+</body>
+</html>

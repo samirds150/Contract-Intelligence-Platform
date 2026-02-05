@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,20 +10,27 @@
 <body>
   <div class="container">
     <h1>Answer</h1>
-    <h3>Question</h3>
-    <p>{{ question }}</p>
+    {% if error %}
+      <p style="color: red;">Error: {{ error }}</p>
+    {% elif result %}
+      <h3>Question</h3>
+      <p>{{ question }}</p>
 
-    <h3>Answer</h3>
-    <p>{{ result.answer }}</p>
-    <p>Confidence: {{ result.confidence }}</p>
+      <h3>Answer</h3>
+      <p>{{ result.answer }}</p>
+      <p>Confidence: {{ result.confidence|floatformat:2 }}%</p>
 
-    <h3>Sources</h3>
-    <ul>
-      {% for s in result.sources %}
-        <li>{{ s }}</li>
-      {% endfor %}
-    </ul>
-
+      <h3>Sources</h3>
+      {% if result.sources %}
+        <ul>
+          {% for s in result.sources %}
+            <li>{{ s }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No sources found.</p>
+      {% endif %}
+    {% endif %}
     <p><a href="{% url 'ragapp:index' %}">Back</a></p>
   </div>
 </body>

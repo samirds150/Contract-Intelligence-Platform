@@ -26,7 +26,7 @@
     <h2>Upload .txt files</h2>
     <form action="{% url 'ragapp:upload' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      {{ upload_form.files }}
+      {{ upload_form.file }}
       <button type="submit">Upload & Rebuild</button>
     </form>
 
