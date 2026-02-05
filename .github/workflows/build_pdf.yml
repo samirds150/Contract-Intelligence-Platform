@@ -6,12 +6,18 @@ on:
     paths:
       - 'docs/Full_Project_Guide.md'
 
+permissions:
+  contents: write
+
 jobs:
   build_pdf:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Build PDF with pandoc/latex Docker image
         run: |
@@ -28,7 +34,7 @@ jobs:
           git add docs/Full_Project_Guide.pdf || true
           if ! git diff --cached --quiet; then
             git commit -m "docs: add generated Full_Project_Guide.pdf"
-            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:$BRANCH
+            git push origin HEAD:$BRANCH
           else
             echo "No changes to commit"
           fi
