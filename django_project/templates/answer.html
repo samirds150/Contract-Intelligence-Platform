@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Answer</title>
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <style>.container{max-width:900px;margin:2rem auto;}</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Answer</h1>
+    <h3>Question</h3>
+    <p>{{ question }}</p>
+
+    <h3>Answer</h3>
+    <p>{{ result.answer }}</p>
+    <p>Confidence: {{ result.confidence }}</p>
+
+    <h3>Sources</h3>
+    <ul>
+      {% for s in result.sources %}
+        <li>{{ s }}</li>
+      {% endfor %}
+    </ul>
+
+    <p><a href="{% url 'ragapp:index' %}">Back</a></p>
+  </div>
+</body>
+</html>

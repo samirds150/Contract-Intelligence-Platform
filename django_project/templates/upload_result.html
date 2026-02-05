@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Upload Result</title>
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <style>.container{max-width:900px;margin:2rem auto;}</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upload Result</h1>
+    <p>Saved files:</p>
+    <ul>
+      {% for s in saved %}
+        <li>{{ s }}</li>
+      {% endfor %}
+    </ul>
+    <p><a href="{% url 'ragapp:index' %}">Back</a></p>
+  </div>
+</body>
+</html>
